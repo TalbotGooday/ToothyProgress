@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.Gravity
 import android.view.View
+import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.Toast
@@ -26,11 +27,25 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 			if (mp.isPlaying) {
 				mHandler.postDelayed(this, 100)
 			}
+			"choplin_medium_demo.otf.otf"
 		}
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		window.apply {
+			clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+				addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+			}
+			decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+				statusBarColor = Color.TRANSPARENT
+			}
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+				decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+			}
+		}
 
 		again.setOnClickListener { toothyProgress.fracturesCount = 10; initProgressViews() }
 
@@ -51,20 +66,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 		play.setOnClickListener {
 			playSomething()
 		}
-
-		Handler().postDelayed({
-			toothyProgress.setFractureData(listOf(
-					.5f to .5f,
-					.5f to 0f,
-					.5f to .5f,
-					1f to -.5f,
-					1f to .5f,
-					.5f to .0f,
-					1f to 1f,
-					1f to .0f,
-					1f to .0f
-			))
-		}, 200)
 
 		mp.setOnCompletionListener { // Changing button image to play button
 			play.setImageResource(R.drawable.ic_play_arrow)

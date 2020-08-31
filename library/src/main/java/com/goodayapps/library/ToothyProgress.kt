@@ -19,17 +19,17 @@ class ToothyProgress : View {
 
 	private val progressPaint: Paint = Paint().apply {
 		strokeCap = Paint.Cap.ROUND
-		strokeWidth = context.convertDpToPixel(4).toFloat()
+		strokeWidth = context.convertDpToPixel(3).toFloat()
 		style = Paint.Style.FILL_AND_STROKE
-		color = Color.parseColor("#A2A4A8")
+		color = Color.parseColor("#ffffff")
 		isAntiAlias = true
 	}
 
 	private val progressBackgroundPaint: Paint = Paint().apply {
 		strokeCap = Paint.Cap.ROUND
-		strokeWidth = context.convertDpToPixel(4).toFloat()
+		strokeWidth = context.convertDpToPixel(3).toFloat()
 		style = Paint.Style.FILL_AND_STROKE
-		color = Color.WHITE
+		color = Color.parseColor("#959595")
 		isAntiAlias = true
 	}
 
@@ -68,6 +68,20 @@ class ToothyProgress : View {
 		setPadding(padding, padding, padding, padding)
 	}
 
+	override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+		super.onSizeChanged(w, h, oldw, oldh)
+		setFractureData(listOf(
+				.5f to .5f,
+				.5f to 0f,
+				.5f to .5f,
+				1f to -.5f,
+				1f to .5f,
+				.5f to .0f,
+				1f to 1f,
+				1f to .0f,
+				1f to .0f
+		))
+	}
 	override fun onDraw(canvas: Canvas) {
 		super.onDraw(canvas)
 
