@@ -5,6 +5,7 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -14,6 +15,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import com.bosphere.verticalslider.VerticalSlider
+import com.goodayapps.library.ToothyProgress
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -27,7 +29,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 			if (mp.isPlaying) {
 				mHandler.postDelayed(this, 100)
 			}
-			"choplin_medium_demo.otf.otf"
+			"quicksand_bold" +
+					"quicksand_light" +
+					"quicksand_medium" +
+					"quicksand_semi_bold.ttf"
 		}
 	}
 
@@ -60,6 +65,31 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
 			override fun onStopTrackingTouch(seekBar: SeekBar) {
 				toothyProgress.setProgress(seekBar.progress / 100f)
+			}
+		})
+
+		toothyProgress.setListener(object : ToothyProgress.Listener {
+			override fun onProgressChanged(progress: Float, fromUser: Boolean) {
+				Log.d("toothyProgress", "onProgressChanged: progress: $progress, fromUser: $fromUser")
+			}
+
+			override fun onStartTrackingTouch(progress: Float) {
+				// remove message Handler from updating progress bar
+				mHandler.removeCallbacks(mUpdateTimeTask)
+			}
+
+			override fun onStopTrackingTouch(progress: Float) {
+				mHandler.removeCallbacks(mUpdateTimeTask)
+				val totalDuration = mp.duration
+				val currentPosition = (progress * totalDuration).toInt()
+
+				// forward or backward to certain seconds
+				mp.seekTo(currentPosition)
+
+				// update timer progress again
+
+				// update timer progress again
+				mHandler.post(mUpdateTimeTask)
 			}
 		})
 
@@ -103,11 +133,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
 		// Updating progress bar
 		val progress = getProgressSeekBar(currentDuration, totalDuration)
-		toothyProgress.progressPercent = progress
-	}
-
-	private fun getProgressSeekBar(currentDuration: Long, totalDuration: Long): Float {
-		return currentDuration / totalDuration.toFloat()
+		toothyProgress.setProgress(progress, false)
 	}
 
 	private fun initProgressViews() {
@@ -163,4 +189,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 	private fun getProgressFromFracture(fracture: Float): Float {
 		return (-fracture + 1f) / 2f
 	}
+
+	private fun getProgressSeekBar(currentDuration: Long, totalDuration: Long): Float {
+		return currentDuration / totalDuration.toFloat()
+	}
+
 }

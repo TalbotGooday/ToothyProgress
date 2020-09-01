@@ -7,13 +7,15 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Build
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityNodeInfo.RangeInfo
 import androidx.annotation.FloatRange
 import androidx.annotation.RequiresApi
 import com.goodayapps.library.utils.convertDpToPixel
 import kotlin.math.abs
 import kotlin.random.Random.Default.nextFloat
-import kotlin.random.Random.Default.nextInt
 
 class ToothyProgress : View {
 
@@ -33,16 +35,17 @@ class ToothyProgress : View {
 		isAntiAlias = true
 	}
 
-	var progressPercent: Float = .0f
-		set(value) {
-			field = value
-			invalidate()
-		}
-
-	var fracturesCount = nextInt(3, 7)
+	var fracturesCount = 9
 		set(value) {
 			field = value
 			getStepsData()
+			invalidate()
+		}
+
+	private var progressPercent: Float = .0f
+		set(value) {
+			field = value
+			listener?.onProgressChanged(value, isTouching)
 			invalidate()
 		}
 
@@ -56,6 +59,11 @@ class ToothyProgress : View {
 
 	private var progressAnimator: ValueAnimator? = null
 
+	private var pointerPosition = -1f
+	private var isTouching = false
+
+	private var listener: Listener? = null
+
 	constructor(context: Context?) : super(context)
 	constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 	constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
@@ -66,6 +74,21 @@ class ToothyProgress : View {
 	init {
 		val padding = context.convertDpToPixel(12)
 		setPadding(padding, padding, padding, padding)
+	}
+
+	override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
+		super.onInitializeAccessibilityNodeInfo(info)
+		info.className = "android.widget.Switch"
+		info.contentDescription = "Progress bar"
+
+		val rangeInfo = RangeInfo.obtain(
+				RangeInfo.RANGE_TYPE_INT,
+				0.0f,
+				1f,
+				progressPercent
+		)
+
+		info.rangeInfo = rangeInfo
 	}
 
 	override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -82,14 +105,71 @@ class ToothyProgress : View {
 				1f to .0f
 		))
 	}
+
 	override fun onDraw(canvas: Canvas) {
 		super.onDraw(canvas)
 
 		drawProgressForeground(canvas, progressBackgroundPaint)
 		drawProgressForeground(canvas, progressPaint, progressPercent)
+		drawPointer(canvas)
+	}
+
+	private fun drawPointer(canvas: Canvas) {
+		if (pointerPosition < 0f) return
+
+		canvas.save()
+		canvas.translate(0f, paddingTop.toFloat())
+
+		canvas.drawLine(pointerPosition, 0f, pointerPosition, canvasHeight.toFloat(), progressBackgroundPaint)
+
+		canvas.restore()
+	}
+
+	override fun onTouchEvent(event: MotionEvent): Boolean {
+		when (event.actionMasked) {
+			MotionEvent.ACTION_DOWN,
+			MotionEvent.ACTION_MOVE -> {
+				trackTouch(event)
+
+				return true
+			}
+			MotionEvent.ACTION_UP,
+			MotionEvent.ACTION_CANCEL -> {
+				stopTrackingTouch()
+				return true
+			}
+		}
+
+		return super.onTouchEvent(event)
+	}
+
+	private fun stopTrackingTouch() {
+		isTouching = false
+		pointerPosition = -1f
+
+		invalidate()
+
+		listener?.onStopTrackingTouch(progressPercent)
+	}
+
+	private fun trackTouch(event: MotionEvent) {
+		if (isTouching.not()) {
+			listener?.onStartTrackingTouch(progressPercent)
+		}
+
+		isTouching = true
+		pointerPosition = when {
+			event.x >= (canvasWidth + paddingEnd) -> canvasWidth.toFloat() + paddingEnd
+			event.x <= paddingStart -> paddingStart.toFloat()
+			else -> event.x
+		}
+
+		progressPercent = ((pointerPosition - paddingStart) / canvasWidth.toFloat()).coerceAtMost(1f)
 	}
 
 	fun setProgress(@FloatRange(from = 0.0, to = 1.0) progress: Float, animated: Boolean = true) {
+		if (isTouching) return
+
 		if (animated) {
 			progressAnimator?.cancel()
 			val currentProgress = progressPercent
@@ -101,6 +181,10 @@ class ToothyProgress : View {
 		} else {
 			progressPercent = progress
 		}
+	}
+
+	fun setListener(listener: Listener) {
+		this.listener = listener
 	}
 
 	fun setFractureData(data: List<Pair<Float, Float>>) {
@@ -226,5 +310,11 @@ class ToothyProgress : View {
 		val lambda = abs((start.first - maxX) / (maxX - end.first))
 
 		return (start.second + end.second * lambda) / (1 + lambda)
+	}
+
+	interface Listener {
+		fun onProgressChanged(progress: Float, fromUser: Boolean)
+		fun onStartTrackingTouch(progress: Float)
+		fun onStopTrackingTouch(progress: Float)
 	}
 }

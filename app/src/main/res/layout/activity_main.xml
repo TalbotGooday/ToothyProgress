@@ -44,42 +44,34 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_margin="12dp"
-			android:max="100"
-			android:visibility="gone" />
+			android:max="100" />
 
-		<androidx.appcompat.widget.AppCompatTextView
+		<androidx.core.widget.ContentLoadingProgressBar
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_weight="1"
-			android:fontFamily="@font/blacksword"
-			android:gravity="center"
-			android:text="Never\nlook back"
-			android:textColor="#373434"
-			android:textSize="44sp" />
-
+			android:layout_height="wrap_content"/>
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="16dp"
 			android:layout_marginEnd="16dp"
 			android:gravity="bottom"
+			android:layout_marginBottom="16dp"
 			android:orientation="horizontal">
 
 			<androidx.appcompat.widget.AppCompatImageView
 				android:id="@+id/play"
 				android:layout_width="56dp"
 				android:layout_height="56dp"
-				android:layout_marginBottom="12dp"
 				android:background="@drawable/bg_play"
 				android:padding="14dp"
+				android:layout_marginEnd="12dp"
 				android:tint="#ffffff"
 				app:srcCompat="@drawable/ic_play_arrow" />
 
 			<com.goodayapps.library.ToothyProgress
 				android:id="@+id/toothyProgress"
 				android:layout_width="match_parent"
-				android:layout_height="80dp"
-				android:layout_margin="12dp" />
+				android:layout_height="80dp"/>
 
 		</LinearLayout>
 
@@ -87,8 +79,8 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="16dp"
-			android:fontFamily="@font/choplin_medium_demo"
-			android:text="Some song"
+			android:fontFamily="@font/quicksand_semi_bold"
+			android:text="ありがとうございました (Thank you)"
 			android:textColor="@android:color/white"
 			android:textSize="18sp" />
 
@@ -98,8 +90,8 @@
 			android:layout_marginStart="16dp"
 			android:layout_marginBottom="22dp"
 			android:alpha=".7"
-			android:fontFamily="@font/choplin_extra_light_demo"
-			android:text="Some guy"
+			android:fontFamily="@font/quicksand_light"
+			android:text="Alex Gooday"
 			android:textColor="@android:color/white"
 			android:textSize="14sp" />
 	</LinearLayout>
