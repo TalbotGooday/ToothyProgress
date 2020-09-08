@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:background="@drawable/bg"
@@ -45,9 +46,10 @@
 			android:layout_height="wrap_content"
 			android:layout_marginStart="16dp"
 			android:fontFamily="@font/quicksand_semi_bold"
-			android:text="ありがとうございました (Thank you)"
+			android:text="ありがとうございました"
 			android:textColor="@android:color/white"
-			android:textSize="18sp" />
+			android:textSize="18sp"
+			tools:ignore="HardcodedText" />
 
 		<androidx.appcompat.widget.AppCompatTextView
 			android:layout_width="match_parent"
@@ -57,6 +59,7 @@
 			android:alpha=".7"
 			android:fontFamily="@font/quicksand_light"
 			android:text="Alex Gooday"
+			tools:ignore="HardcodedText"
 			android:textColor="@android:color/white"
 			android:textSize="14sp" />
 	</LinearLayout>
