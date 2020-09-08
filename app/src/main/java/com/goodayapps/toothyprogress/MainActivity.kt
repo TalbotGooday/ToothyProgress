@@ -1,27 +1,23 @@
 package com.goodayapps.toothyprogress
 
+import android.content.Intent
 import android.graphics.Color
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
-import android.widget.LinearLayout
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatTextView
-import com.bosphere.verticalslider.VerticalSlider
 import com.goodayapps.library.ToothyProgress
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 	private val mp = MediaPlayer()
 	private val mHandler = Handler()
-	private val mUpdateTimeTask = object : Runnable{
+	private val mUpdateTimeTask = object : Runnable {
 		override fun run() {
 			updateTimerAndSeekbar()
 
@@ -29,10 +25,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 			if (mp.isPlaying) {
 				mHandler.postDelayed(this, 100)
 			}
-			"quicksand_bold" +
-					"quicksand_light" +
-					"quicksand_medium" +
-					"quicksand_semi_bold.ttf"
 		}
 	}
 
@@ -52,21 +44,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 			}
 		}
 
-		again.setOnClickListener { toothyProgress.fracturesCount = 10; initProgressViews() }
-
-		initProgressViews()
-
-		testSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-			override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-			}
-
-			override fun onStartTrackingTouch(seekBar: SeekBar) {
-			}
-
-			override fun onStopTrackingTouch(seekBar: SeekBar) {
-				toothyProgress.setProgress(seekBar.progress / 100f)
-			}
-		})
 
 		toothyProgress.setListener(object : ToothyProgress.Listener {
 			override fun onProgressChanged(progress: Float, fromUser: Boolean) {
@@ -93,10 +70,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 			}
 		})
 
-		play.setOnClickListener {
-			playSomething()
-		}
+		play.setOnClickListener { playSomething() }
 
+		actionTest.setOnClickListener { openTestScreen() }
 		mp.setOnCompletionListener { // Changing button image to play button
 			play.setImageResource(R.drawable.ic_play_arrow)
 		}
@@ -110,6 +86,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 		} catch (e: Exception) {
 			Toast.makeText(this, "Cannot load audio file", Toast.LENGTH_SHORT).show()
 		}
+	}
+
+	private fun openTestScreen() {
+		startActivity(Intent(this, TestActivity::class.java))
 	}
 
 	private fun playSomething() {
@@ -134,60 +114,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 		// Updating progress bar
 		val progress = getProgressSeekBar(currentDuration, totalDuration)
 		toothyProgress.setProgress(progress, false)
-	}
-
-	private fun initProgressViews() {
-		fractureSeekBars.removeAllViews()
-
-		for (i: Int in 0..toothyProgress.fracturesCount) {
-			fractureSeekBars.addView(getProgressView(toothyProgress.getFractureY(i)))
-		}
-	}
-
-	private fun getProgressView(fractureY: Float): View? {
-		return LinearLayout(this).apply {
-			layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT).apply {
-				orientation = LinearLayout.VERTICAL
-				gravity = Gravity.CENTER
-			}
-			addView(VerticalSlider(this.context).apply {
-				layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT).apply {
-					val margin = convertDpToPixel(10)
-					setMargins(margin, 0, margin, 0)
-					weight = 1f
-				}
-
-				setThumbColor(Color.WHITE)
-				setTrackBgColor(Color.parseColor("#66FFFFFF"))
-				setTrackFgColor(Color.parseColor("#A2A4A8"))
-
-				setProgress(getProgressFromFracture(fractureY))
-
-				setOnSliderProgressChangeListener {
-					val index = fractureSeekBars.indexOfChild(this.parent as View)
-
-					val height = getHeightInRangeFromProgress(it)
-
-					toothyProgress.setFractureY(index, height)
-
-					(parent as LinearLayout).findViewWithTag<AppCompatTextView>("label")?.text = height.toString()
-				}
-			})
-
-			addView(AppCompatTextView(this.context).apply {
-				tag = "label"
-				setTextColor(Color.WHITE)
-				text = fractureY.toString()
-			})
-		}
-	}
-
-	private fun getHeightInRangeFromProgress(progress: Float): Float {
-		return ((2f * progress) - 1f) * -1f
-	}
-
-	private fun getProgressFromFracture(fracture: Float): Float {
-		return (-fracture + 1f) / 2f
 	}
 
 	private fun getProgressSeekBar(currentDuration: Long, totalDuration: Long): Float {

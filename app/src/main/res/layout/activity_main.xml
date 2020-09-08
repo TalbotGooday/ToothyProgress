@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
@@ -14,64 +14,29 @@
 		android:gravity="bottom"
 		android:orientation="vertical">
 
-		<androidx.appcompat.widget.AppCompatImageView
-			android:id="@+id/again"
-			android:layout_width="48dp"
-			android:layout_height="48dp"
-			android:layout_margin="12dp"
-			android:layout_marginTop="12dp"
-			android:background="@drawable/bg_random"
-			android:padding="14dp"
-			android:tint="#ffffff"
-			android:visibility="gone"
-			app:srcCompat="@drawable/ic_360" />
-
-		<LinearLayout
-			android:id="@+id/fractureSeekBars"
-			android:layout_width="match_parent"
-			android:layout_height="140dp"
-			android:background="#4D6C6A70"
-			android:minWidth="100dp"
-			android:orientation="horizontal"
-			android:paddingTop="12dp"
-			android:paddingBottom="12dp"
-			android:visibility="gone">
-
-		</LinearLayout>
-
-		<SeekBar
-			android:id="@+id/testSeek"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_margin="12dp"
-			android:max="100" />
-
-		<androidx.core.widget.ContentLoadingProgressBar
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"/>
 		<LinearLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="16dp"
 			android:layout_marginEnd="16dp"
-			android:gravity="bottom"
 			android:layout_marginBottom="16dp"
+			android:gravity="bottom"
 			android:orientation="horizontal">
 
 			<androidx.appcompat.widget.AppCompatImageView
 				android:id="@+id/play"
 				android:layout_width="56dp"
 				android:layout_height="56dp"
+				android:layout_marginEnd="12dp"
 				android:background="@drawable/bg_play"
 				android:padding="14dp"
-				android:layout_marginEnd="12dp"
 				android:tint="#ffffff"
 				app:srcCompat="@drawable/ic_play_arrow" />
 
 			<com.goodayapps.library.ToothyProgress
 				android:id="@+id/toothyProgress"
 				android:layout_width="match_parent"
-				android:layout_height="80dp"/>
+				android:layout_height="80dp" />
 
 		</LinearLayout>
 
@@ -96,4 +61,12 @@
 			android:textSize="14sp" />
 	</LinearLayout>
 
-</LinearLayout>
+	<androidx.appcompat.widget.AppCompatImageButton
+		android:id="@+id/actionTest"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="end|top"
+		android:layout_margin="16dp"
+		android:background="?selectableItemBackgroundBorderless"
+		app:srcCompat="@drawable/ic_adb" />
+</FrameLayout>

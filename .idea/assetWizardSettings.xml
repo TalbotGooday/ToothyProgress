@@ -3,6 +3,11 @@
   <component name="WizardSettings">
     <option name="children">
       <map>
+        <entry key="imageWizard">
+          <value>
+            <PersistentState />
+          </value>
+        </entry>
         <entry key="vectorWizard">
           <value>
             <PersistentState>
@@ -18,7 +23,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/home/gooday/android-studio4/plugins/android/lib/android.jar!/images/material/icons/materialiconsround/pause/round_pause_24.xml" />
+                                      <entry key="url" value="jar:file:/home/gooday/android-studio4/plugins/android/lib/android.jar!/images/material/icons/materialicons/adb/baseline_adb_24.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,7 +33,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_pause" />
+                            <entry key="outputName" value="ic_adb" />
                           </map>
                         </option>
                       </PersistentState>

@@ -275,7 +275,7 @@ class ToothyProgress : View {
 	}
 
 	private fun drawProgressForeground(canvas: Canvas, paint: Paint, progress: Float = 1f) {
-		if (data.isEmpty()) return
+		if (data.isEmpty() || progress == 0f) return
 
 		canvas.save()
 
