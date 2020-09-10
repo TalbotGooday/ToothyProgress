@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<declare-styleable name="ToothyProgress">
+		<attr name="lineCap" format="enum">
+			<enum name="round" value="1"/>
+			<enum name="square" value="2"/>
+		</attr>
+		<attr name="progress" format="float"/>
+		<attr name="progressColor" format="reference|color"/>
+		<attr name="progressBackgroundColor" format="reference|color"/>
+		<attr name="progressWidth" format="dimension"/>
+		<attr name="progressBackgroundWidth" format="dimension"/>
+	</declare-styleable>
+</resources>
