@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<declare-styleable name="ToothyProgress">
-		<attr name="strokeLineCap" format="enum">
+		<attr name="strokeLineCapProgress" format="enum">
+			<enum name="butt" value="0"/>
+			<enum name="round" value="1"/>
+			<enum name="square" value="2"/>
+		</attr>
+		<attr name="strokeLineCapProgressBackground" format="enum">
+			<enum name="butt" value="0"/>
+			<enum name="round" value="1"/>
+			<enum name="square" value="2"/>
+		</attr>
+		<attr name="strokeLineCapTrack" format="enum">
 			<enum name="butt" value="0"/>
 			<enum name="round" value="1"/>
 			<enum name="square" value="2"/>
@@ -9,7 +19,9 @@
 		<attr name="progress" format="float"/>
 		<attr name="progressColor" format="reference|color"/>
 		<attr name="progressBackgroundColor" format="reference|color"/>
+		<attr name="trackColor" format="reference|color"/>
 		<attr name="progressWidth" format="dimension"/>
+		<attr name="trackWidth" format="dimension"/>
 		<attr name="progressBackgroundWidth" format="dimension"/>
 	</declare-styleable>
 </resources>

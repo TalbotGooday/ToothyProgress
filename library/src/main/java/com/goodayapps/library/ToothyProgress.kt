@@ -18,9 +18,12 @@ import androidx.annotation.FloatRange
 import androidx.annotation.RequiresApi
 import com.goodayapps.library.utils.convertDpToPixel
 import kotlin.math.abs
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 class ToothyProgress : View {
 
+	private val trackPaint: Paint = getMarkerPaint()
 	private val progressPaint: Paint = getProgressPaint()
 	private val progressBackgroundPaint: Paint = getProgressBackgroundPaint()
 
@@ -31,16 +34,24 @@ class ToothyProgress : View {
 			invalidate()
 		}
 
-	var strokeCap = Paint.Cap.ROUND
+	var progressStrokeCap = Paint.Cap.ROUND
 		set(value) {
-			field = if (value == Paint.Cap.BUTT) {
-				Paint.Cap.SQUARE
-			} else {
-				field
-			}
-
+			field = value
 			progressPaint.strokeCap = value
+
+			invalidate()
+		}
+	var progressBackgroundStrokeCap = Paint.Cap.ROUND
+		set(value) {
+			field = value
 			progressBackgroundPaint.strokeCap = value
+
+			invalidate()
+		}
+	var strokeLineCapTrack = Paint.Cap.ROUND
+		set(value) {
+			field = value
+			trackPaint.strokeCap = value
 
 			invalidate()
 		}
@@ -63,11 +74,29 @@ class ToothyProgress : View {
 			invalidate()
 		}
 
+	@ColorInt
+	var trackColor = Color.parseColor("#959595")
+		set(value) {
+			field = value
+			trackPaint.color = value
+
+			invalidate()
+		}
+
 	@Dimension(unit = Dimension.PX)
 	var progressWidth = context.convertDpToPixel(3).toFloat()
 		set(value) {
 			field = value
 			progressPaint.strokeWidth = value
+
+			invalidate()
+		}
+
+	@Dimension(unit = Dimension.PX)
+	var trackWidth = context.convertDpToPixel(3).toFloat()
+		set(value) {
+			field = value
+			trackPaint.strokeWidth = value
 
 			invalidate()
 		}
@@ -160,7 +189,7 @@ class ToothyProgress : View {
 		canvas.save()
 		canvas.translate(0f, paddingTop.toFloat())
 
-		canvas.drawLine(pointerPosition, 0f, pointerPosition, canvasHeight.toFloat(), progressBackgroundPaint)
+		canvas.drawLine(pointerPosition, 0f, pointerPosition, canvasHeight.toFloat(), trackPaint)
 
 		canvas.restore()
 	}
@@ -375,24 +404,44 @@ class ToothyProgress : View {
 		) ?: return
 
 		with(resAttrs) {
-			val strokeLineCap = getInt(R.styleable.ToothyProgress_strokeLineCap, 1)
-			strokeCap = when (strokeLineCap) {
-				0 -> Paint.Cap.BUTT
-				1 -> Paint.Cap.ROUND
-				else -> Paint.Cap.SQUARE
-			}
-			progress = getFloat(R.styleable.ToothyProgress_progress, progress).coerceIn(0f, 1f)
+			progressStrokeCap = getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapProgress, 1))
+			progressBackgroundStrokeCap = getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapProgressBackground, 1))
+			strokeLineCapTrack = getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapTrack, 1))
+
 			progressColor = getColor(R.styleable.ToothyProgress_progressColor, progressColor)
 			progressBackgroundColor = getColor(R.styleable.ToothyProgress_progressBackgroundColor, progressBackgroundColor)
+			trackColor = getColor(R.styleable.ToothyProgress_trackColor, trackColor)
+
 			progressWidth = getDimension(R.styleable.ToothyProgress_progressWidth, progressWidth)
+			trackWidth = getDimension(R.styleable.ToothyProgress_progressWidth, trackWidth)
 			progressBackgroundWidth = getDimension(R.styleable.ToothyProgress_progressBackgroundWidth, progressBackgroundWidth)
 
+			progress = getFloat(R.styleable.ToothyProgress_progress, progress).coerceIn(0f, 1f)
+
 			recycle()
+		}
+	}
+
+	private fun getCapType(strokeLineCap: Int): Paint.Cap {
+		return when (strokeLineCap) {
+			0 -> Paint.Cap.BUTT
+			1 -> Paint.Cap.ROUND
+			else -> Paint.Cap.SQUARE
 		}
 	}
 	//endregion
 
 	//region Paint
+	private fun getMarkerPaint(): Paint {
+		return Paint().apply {
+			strokeCap = Paint.Cap.ROUND
+			strokeWidth = context.convertDpToPixel(3).toFloat()
+			style = Paint.Style.FILL
+			color = trackColor
+			isAntiAlias = true
+		}
+	}
+
 	private fun getProgressPaint(): Paint {
 		return Paint().apply {
 			strokeCap = Paint.Cap.ROUND
