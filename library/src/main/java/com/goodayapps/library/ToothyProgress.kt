@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -17,7 +18,6 @@ import androidx.annotation.FloatRange
 import androidx.annotation.RequiresApi
 import com.goodayapps.library.utils.convertDpToPixel
 import kotlin.math.abs
-import kotlin.random.Random.Default.nextFloat
 
 class ToothyProgress : View {
 
@@ -336,13 +336,16 @@ class ToothyProgress : View {
 		var startY = first.second
 		val maxValue = progress * canvasWidth
 
+		val path = Path()
+		path.moveTo(startX, startY)
+
 		for (nextIndex in 1 until data.size) {
 			val point = data[nextIndex]
 
 			val nextX = point.first.coerceAtMost(maxValue)
 			val nextY = getCoordinateY(startX to startY, point, maxValue)
 
-			canvas.drawLine(startX, startY, nextX, nextY, paint)
+			path.lineTo(nextX, nextY)
 
 			startX = nextX
 			startY = nextY
@@ -350,6 +353,7 @@ class ToothyProgress : View {
 			if (point.first > maxValue) break
 		}
 
+		canvas.drawPath(path, paint)
 		canvas.restore()
 	}
 
@@ -371,8 +375,9 @@ class ToothyProgress : View {
 		) ?: return
 
 		with(resAttrs) {
-			val strokeLineCap = getInt(R.styleable.ToothyProgress_lineCap, 1)
+			val strokeLineCap = getInt(R.styleable.ToothyProgress_strokeLineCap, 1)
 			strokeCap = when (strokeLineCap) {
+				0 -> Paint.Cap.BUTT
 				1 -> Paint.Cap.ROUND
 				else -> Paint.Cap.SQUARE
 			}
@@ -392,7 +397,7 @@ class ToothyProgress : View {
 		return Paint().apply {
 			strokeCap = Paint.Cap.ROUND
 			strokeWidth = context.convertDpToPixel(3).toFloat()
-			style = Paint.Style.FILL_AND_STROKE
+			style = Paint.Style.STROKE
 			color = progressColor
 			isAntiAlias = true
 		}
@@ -402,7 +407,7 @@ class ToothyProgress : View {
 		return Paint().apply {
 			strokeCap = Paint.Cap.ROUND
 			strokeWidth = context.convertDpToPixel(3).toFloat()
-			style = Paint.Style.FILL_AND_STROKE
+			style = Paint.Style.STROKE
 			color = progressBackgroundColor
 			isAntiAlias = true
 		}

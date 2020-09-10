@@ -15,7 +15,7 @@ class TestActivity : AppCompatActivity(R.layout.activity_test) {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
-		again.setOnClickListener { toothyProgress.fracturesCount = 10; initProgressViews() }
+		again.setOnClickListener { initProgressViews() }
 
 		testSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
 			override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -37,9 +37,9 @@ class TestActivity : AppCompatActivity(R.layout.activity_test) {
 	private fun initProgressViews() {
 		fractureSeekBars.removeAllViews()
 
-		for (i: Int in 0..toothyProgress.fracturesCount) {
-			fractureSeekBars.addView(getProgressView(toothyProgress.getFractureY(i)))
-		}
+//		for (i: Int in 0..toothyProgress.fracturesCount) {
+//			fractureSeekBars.addView(getProgressView(toothyProgress.getFractureY(i)))
+//		}
 	}
 
 	private fun getProgressView(fractureY: Float): View? {

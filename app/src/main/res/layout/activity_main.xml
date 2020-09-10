@@ -38,11 +38,11 @@
 				android:id="@+id/toothyProgress"
 				android:layout_width="match_parent"
 				android:layout_height="80dp"
-				app:lineCap="round"
 				app:progress=".5"
 				app:progressColor="#ffffff"
 				app:progressBackgroundColor="#959595"
 				app:progressWidth="3dp"
+				app:strokeLineCap="round"
 				app:progressBackgroundWidth="3dp"
 				/>
 

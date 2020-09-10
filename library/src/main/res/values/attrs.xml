@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<declare-styleable name="ToothyProgress">
-		<attr name="lineCap" format="enum">
+		<attr name="strokeLineCap" format="enum">
+			<enum name="butt" value="0"/>
 			<enum name="round" value="1"/>
 			<enum name="square" value="2"/>
 		</attr>
