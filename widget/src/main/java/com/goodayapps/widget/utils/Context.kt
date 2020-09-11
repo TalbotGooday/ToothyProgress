@@ -1,4 +1,4 @@
-package com.goodayapps.library.utils
+package com.goodayapps.widget.utils
 
 import android.content.Context
 import android.content.res.Resources

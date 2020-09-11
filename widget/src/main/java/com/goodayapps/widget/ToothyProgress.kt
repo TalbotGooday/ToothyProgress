@@ -1,4 +1,4 @@
-package com.goodayapps.library
+package com.goodayapps.widget
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -16,7 +16,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Dimension
 import androidx.annotation.FloatRange
 import androidx.annotation.RequiresApi
-import com.goodayapps.library.utils.convertDpToPixel
+import com.goodayapps.widget.utils.convertDpToPixel
 import kotlin.math.abs
 
 class ToothyProgress : View {

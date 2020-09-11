@@ -34,7 +34,7 @@
 				android:tint="#ffffff"
 				app:srcCompat="@drawable/ic_play_arrow" />
 
-			<com.goodayapps.library.ToothyProgress
+			<com.goodayapps.widget.ToothyProgress
 				android:id="@+id/toothyProgress"
 				android:layout_width="match_parent"
 				android:layout_height="80dp"

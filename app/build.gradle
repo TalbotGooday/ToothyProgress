@@ -37,8 +37,8 @@ dependencies {
     implementation 'com.github.bosphere:android-verticalslider:1.0.3'
 
     //Library
-    implementation(project(":library"))
-//    implementation 'com.github.TalbotGooday:ToothyProgress:0.0.1'
+    implementation(project(":widget"))
+    implementation 'com.github.TalbotGooday:ToothyProgress:0.0.2-alpha.03'
 
     //Tests
     testImplementation 'junit:junit:4.13'

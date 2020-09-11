@@ -35,7 +35,7 @@
 		android:layout_margin="12dp"
 		android:max="100" />
 
-	<com.goodayapps.library.ToothyProgress
+	<com.goodayapps.widget.ToothyProgress
 		android:id="@+id/toothyProgress"
 		android:layout_width="match_parent"
 		android:layout_height="80dp" />

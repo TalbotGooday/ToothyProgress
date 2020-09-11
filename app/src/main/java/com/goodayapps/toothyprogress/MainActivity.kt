@@ -11,7 +11,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.goodayapps.library.ToothyProgress
+import com.goodayapps.widget.ToothyProgress
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -70,6 +70,19 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 			}
 		})
 
+		toothyProgress.setListener(object : ToothyProgress.Listener {
+			override fun onProgressChanged(progress: Float, fromUser: Boolean) {
+				// invokes every time the progress's been changed
+			}
+
+			override fun onStartTrackingTouch(progress: Float) {
+				// invokes when user touches the view
+			}
+
+			override fun onStopTrackingTouch(progress: Float) {
+				// invokes when user releases the touch
+			}
+		})
 		play.setOnClickListener { playSomething() }
 
 		actionTest.setOnClickListener { openTestScreen() }
