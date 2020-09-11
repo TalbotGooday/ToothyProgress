@@ -18,8 +18,6 @@ import androidx.annotation.FloatRange
 import androidx.annotation.RequiresApi
 import com.goodayapps.library.utils.convertDpToPixel
 import kotlin.math.abs
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 
 class ToothyProgress : View {
 
@@ -48,6 +46,7 @@ class ToothyProgress : View {
 
 			invalidate()
 		}
+
 	var strokeLineCapTrack = Paint.Cap.ROUND
 		set(value) {
 			field = value
@@ -147,8 +146,8 @@ class ToothyProgress : View {
 
 	override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
 		super.onInitializeAccessibilityNodeInfo(info)
-		info.className = "android.widget.SeekBar"
-		info.contentDescription = "SeekBar"
+		info.className = "android.widget.ProgressBar"
+		info.contentDescription = "ProgressBar"
 
 		val rangeInfo = RangeInfo.obtain(
 				RangeInfo.RANGE_TYPE_INT,
