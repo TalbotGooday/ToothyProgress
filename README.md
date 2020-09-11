@@ -28,23 +28,24 @@ dependencies {
 
 ## Code example
 
-Settle the wave somewhere in your XML like this:
+Settle the ToothyProgress somewhere in your XML like this:
 
 ```xml
-<rm.com.audiowave.AudioWaveView
-    android:id="@+id/wave"
-    android:layout_width="match_parent"
-    android:layout_height="32dp"
-    android:layout_margin="16dp"
-    app:animateExpansion="false"
-    app:chunkWidth="3dp"
-    app:chunkHeight="24dp"
-    app:minChunkHeight="2dp"
-    app:chunkSpacing="1dp"
-    app:chunkRadius="1dp"
-    app:touchable="true"
-    app:waveColor="@android:color/white"
-    />
+<com.goodayapps.widget.ToothyProgress
+	android:id="@+id/toothyProgress"
+	android:layout_width="match_parent"
+	android:layout_height="80dp"
+	app:progress=".5"
+	app:progressColor="#ffffff"
+	app:progressBackgroundColor="#959595"
+	app:progressWidth="3dp"
+	app:trackWidth="3dp"
+	app:trackColor="#959595"
+	app:strokeLineCapProgress="round"
+	app:strokeLineCapProgressBackground="square"
+	app:strokeLineCapTrack="square"
+	app:progressBackgroundWidth="3dp"
+	/>
 ```
 Seekbar-like listener:
 ```kotlin
