@@ -16,8 +16,6 @@ app/proguard-rules.pro
 .idea/vcs.xml
 app/build/
 gradle/wrapper/gradle-wrapper.jar
-gradlew
-gradlew.bat
 app/libs/
 countriesflagskit/libs/
 app/release/
