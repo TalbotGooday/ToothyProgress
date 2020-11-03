@@ -8,4 +8,8 @@
 		<item name="android:fitsSystemWindows">true</item>
 	</style>
 
+	<style name="TestTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+		<item name="colorPrimary">#453B68</item>
+		<item name="colorPrimaryDark">#453B68</item>
+	</style>
 </resources>

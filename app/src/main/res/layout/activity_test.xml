@@ -1,42 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	android:background="#453B68"
 	android:orientation="vertical">
 
-	<androidx.appcompat.widget.AppCompatImageView
+	<TextView
 		android:id="@+id/again"
-		android:layout_width="48dp"
+		android:layout_width="match_parent"
 		android:layout_height="48dp"
-		android:layout_margin="12dp"
-		android:layout_marginTop="12dp"
-		android:background="@drawable/bg_random"
-		android:padding="14dp"
-		android:tint="#ffffff"
-		app:srcCompat="@drawable/ic_360" />
+		android:background="?selectableItemBackground"
+		android:drawablePadding="12dp"
+		android:gravity="center_vertical"
+		android:paddingStart="12dp"
+		android:paddingEnd="12dp"
+		android:text="Clear to default"
+		android:textColor="#ffffff"
+		android:textSize="18sp"
+		app:drawableStartCompat="@drawable/ic_360"
+		app:drawableTint="#ffffff"
+		tools:ignore="HardcodedText" />
 
 	<LinearLayout
-		android:id="@+id/fractureSeekBars"
 		android:layout_width="match_parent"
-		android:layout_height="140dp"
-		android:background="#4D6C6A70"
-		android:minWidth="100dp"
-		android:orientation="horizontal"
-		android:paddingTop="12dp"
-		android:paddingBottom="12dp">
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:orientation="horizontal">
+
+		<com.goodayapps.widget.ToothyProgress
+			android:id="@+id/toothyProgressBuilder"
+			android:layout_width="match_parent"
+			android:layout_height="80dp"
+			android:layout_weight="1"
+			app:isBuilderMode="true" />
+
+		<androidx.appcompat.widget.AppCompatImageButton
+			android:id="@+id/add"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:background="?selectableItemBackgroundBorderless"
+			app:srcCompat="@drawable/ic_round_add_24" />
+	</LinearLayout>
+
+	<TextView
+		android:id="@+id/uploadToDemo"
+		android:layout_width="match_parent"
+		android:layout_height="48dp"
+		android:layout_marginTop="12dp"
+		android:background="?selectableItemBackground"
+		android:drawablePadding="12dp"
+		android:gravity="center_vertical"
+		android:paddingStart="12dp"
+		android:paddingEnd="12dp"
+		android:text="Upload to player"
+		android:textColor="#ffffff"
+		android:textSize="18sp"
+		app:drawableStartCompat="@drawable/ic_round_arrow_downward_24"
+		app:drawableTint="#ffffff"
+		tools:ignore="HardcodedText" />
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginStart="16dp"
+		android:layout_marginEnd="16dp"
+		android:layout_marginBottom="16dp"
+		android:gravity="bottom"
+		android:orientation="horizontal">
+
+		<androidx.appcompat.widget.AppCompatImageView
+			android:id="@+id/play"
+			android:layout_width="56dp"
+			android:layout_height="56dp"
+			android:layout_marginEnd="12dp"
+			android:background="@drawable/bg_play"
+			android:padding="14dp"
+			android:tint="#ffffff"
+			app:srcCompat="@drawable/ic_play_arrow" />
+
+		<com.goodayapps.widget.ToothyProgress
+			android:id="@+id/toothyProgressDemo"
+			android:layout_width="match_parent"
+			android:layout_height="80dp"
+			app:progress=".5"
+			app:progressBackgroundColor="#959595"
+			app:progressBackgroundWidth="3dp"
+			app:progressColor="#ffffff"
+			app:progressWidth="3dp"
+			app:strokeLineCapProgress="square"
+			app:strokeLineCapProgressBackground="square"
+			app:strokeLineCapTrack="square"
+			app:trackColor="#959595"
+			app:trackWidth="3dp" />
 
 	</LinearLayout>
 
-	<SeekBar
-		android:id="@+id/testSeek"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_margin="12dp"
-		android:max="100" />
-
-	<com.goodayapps.widget.ToothyProgress
-		android:id="@+id/toothyProgress"
-		android:layout_width="match_parent"
-		android:layout_height="80dp" />
 </LinearLayout>

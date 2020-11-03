@@ -2,10 +2,7 @@ package com.goodayapps.widget
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -18,12 +15,16 @@ import androidx.annotation.FloatRange
 import androidx.annotation.RequiresApi
 import com.goodayapps.widget.utils.convertDpToPixel
 import kotlin.math.abs
+import kotlin.random.Random.Default.nextFloat
 
 class ToothyProgress : View {
 
+	private val debugPaint: Paint = getDebugPaint()
 	private val trackPaint: Paint = getMarkerPaint()
 	private val progressPaint: Paint = getProgressPaint()
 	private val progressBackgroundPaint: Paint = getProgressBackgroundPaint()
+
+	var isBuilderMode = false
 
 	private var progress: Float = .0f
 		set(value) {
@@ -39,6 +40,7 @@ class ToothyProgress : View {
 
 			invalidate()
 		}
+
 	var progressBackgroundStrokeCap = Paint.Cap.ROUND
 		set(value) {
 			field = value
@@ -115,7 +117,11 @@ class ToothyProgress : View {
 	private val canvasHeight
 		get() = height - paddingTop - paddingBottom
 
-	private val data: MutableList<Pair<Float, Float>> = mutableListOf()
+	private val canvasHalfHeight
+		get() = canvasHeight / 2f
+
+	private val data: MutableList<PointF> = mutableListOf()
+	private val fractureData: MutableList<PointF> = mutableListOf()
 
 	private var progressAnimator: ValueAnimator? = null
 
@@ -123,6 +129,11 @@ class ToothyProgress : View {
 	private var isTouching = false
 
 	private var listener: Listener? = null
+
+	private val nearestApex
+		get() = data.getOrNull(nearestApexIndex)
+
+	private var nearestApexIndex: Int = -1
 
 	constructor(context: Context?) : super(context)
 	constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
@@ -161,7 +172,7 @@ class ToothyProgress : View {
 
 	override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
 		super.onSizeChanged(w, h, oldw, oldh)
-		setFractureData(listOf(
+		setFractureDataPairs(listOf(
 				.5f to .5f,
 				.5f to 0f,
 				.5f to .5f,
@@ -177,20 +188,18 @@ class ToothyProgress : View {
 	override fun onDraw(canvas: Canvas) {
 		super.onDraw(canvas)
 
-		drawProgressForeground(canvas, progressBackgroundPaint)
-		drawProgressForeground(canvas, progressPaint, progress)
-		drawPointer(canvas)
-	}
+		//Draw background
+		drawProgress(canvas, progressBackgroundPaint)
 
-	private fun drawPointer(canvas: Canvas) {
-		if (pointerPosition < 0f) return
+		if (isBuilderMode.not()) {
+			//Draw foreground
+			drawProgress(canvas, progressPaint, progress)
+			//Draw pointer
+			drawPointer(canvas)
+		}
 
-		canvas.save()
-		canvas.translate(0f, paddingTop.toFloat())
-
-		canvas.drawLine(pointerPosition, 0f, pointerPosition, canvasHeight.toFloat(), trackPaint)
-
-		canvas.restore()
+		//Draw debug
+		builderDrawDebug(canvas)
 	}
 
 	override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -202,7 +211,11 @@ class ToothyProgress : View {
 			MotionEvent.ACTION_DOWN,
 			MotionEvent.ACTION_MOVE,
 			-> {
-				trackTouch(event)
+				if (nearestApex == null) {
+					trackTouch(event)
+				} else {
+					builderMoveApex(event)
+				}
 
 				return true
 			}
@@ -215,30 +228,6 @@ class ToothyProgress : View {
 		}
 
 		return super.onTouchEvent(event)
-	}
-
-	private fun stopTrackingTouch() {
-		isTouching = false
-		pointerPosition = -1f
-
-		invalidate()
-
-		listener?.onStopTrackingTouch(progress)
-	}
-
-	private fun trackTouch(event: MotionEvent) {
-		if (isTouching.not()) {
-			listener?.onStartTrackingTouch(progress)
-		}
-
-		isTouching = true
-		pointerPosition = when {
-			event.x >= (canvasWidth + paddingEnd) -> canvasWidth.toFloat() + paddingEnd
-			event.x <= paddingStart -> paddingStart.toFloat()
-			else -> event.x
-		}
-
-		progress = ((pointerPosition - paddingStart) / canvasWidth.toFloat()).coerceAtMost(1f)
 	}
 
 	fun setProgress(@FloatRange(from = 0.0, to = 1.0) progress: Float, animated: Boolean = true) {
@@ -261,97 +250,109 @@ class ToothyProgress : View {
 		this.listener = listener
 	}
 
-	fun setFractureData(data: List<Pair<Float, Float>>) {
+	fun setFractureDataPairs(data: List<Pair<Float, Float>>) {
+		setFractureData(data.map { PointF(it.first, it.second) })
+	}
+
+	fun setFractureData(data: List<PointF>) {
 		this.data.clear()
+		this.fractureData.clear()
 		this.data.addAll(getStepsDataByFracture(data))
+		this.fractureData.addAll(data)
 
 		invalidate()
 	}
 
+	fun getFractureData() = fractureData
+
 	fun setFractureY(index: Int, @FloatRange(from = -1.0, to = 1.0) scale: Float) {
-		var fracture = data.getOrNull(index) ?: return
+		var dataItem = data.getOrNull(index) ?: return
+		var fractureItem = fractureData.getOrNull(index) ?: return
 
-		val halfHeight = this.canvasHeight / 2
+		dataItem = PointF(dataItem.x, (canvasHalfHeight + (scale * canvasHalfHeight)))
+		fractureItem = PointF(fractureItem.x, scale)
 
-		fracture = fracture.first to (halfHeight + (scale * halfHeight))
-
-		data[index] = fracture
+		data[index] = dataItem
+		fractureData[index] = fractureItem
 
 		invalidate()
 	}
 
 	fun getFractureY(index: Int): Float {
-		val halfHeight = this.canvasHeight / 2
-		val height = data.getOrNull(index)?.second ?: return 0f
-
-		return (halfHeight - height) / height
+		return fractureData.getOrNull(index)?.y ?: 0f
 	}
-//
-//	private fun getStepsData() {
-//		data.clear()
-//
-//		val fracturesCountFl = fracturesCount.toFloat()
-//
-//		val stepX = canvasWidth / fracturesCountFl
-//		val stepY = canvasHeight / fracturesCountFl
-//
-//		val middleY = canvasHeight / 2f
-//		var startX = 0f
-//		var startY = middleY
-//
-//		data.add(startX to startY)
-//
-//		repeat(fracturesCount) {
-//			val direction = (if (it % 2 == 0) -1 else 1) * (nextFloat() * (2f - .1f) + .1f)
-//
-//			val nextY = (middleY + stepY * direction)
-//
-//			val factorX = nextFloat() * (1.5f - .3f) + .3f
-//			val nextX = startX + (stepX * factorX)
-//
-//			if (fracturesCount == it + 1) {
-//				data.add(canvasWidth.toFloat() to nextY)
-//			} else {
-//				data.add(nextX to nextY)
-//			}
-//
-//			startX = nextX
-//			startY = nextY
-//		}
-//	}
 
-	private fun getStepsDataByFracture(data: List<Pair<Float, Float>>): List<Pair<Float, Float>> {
-		val halfHeight = this.canvasHeight / 2
+	private fun stopTrackingTouch() {
+		isTouching = false
+		pointerPosition = -1f
+		nearestApexIndex = -1
+
+		invalidate()
+
+		listener?.onStopTrackingTouch(progress)
+	}
+
+	private fun trackTouch(event: MotionEvent) {
+		if (isTouching.not()) {
+			listener?.onStartTrackingTouch(progress)
+		}
+
+		isTouching = true
+		pointerPosition = when {
+			event.x >= (canvasWidth + paddingEnd) -> canvasWidth.toFloat() + paddingEnd
+			event.x <= paddingStart -> paddingStart.toFloat()
+			else -> event.x
+		}
+
+		progress = ((pointerPosition - paddingStart) / canvasWidth.toFloat()).coerceAtMost(1f)
+
+		if (isBuilderMode) {
+			builderFindNearestApexForPointer()
+		}
+	}
+
+	private fun getStepsDataByFracture(data: List<PointF>): List<PointF> {
 		val size = data.size
 		val stepX = canvasWidth / size
 
 		var prevX = paddingStart.toFloat()
 
-		val firstIndex = 0
 		val lastIndex = size - 1
 
 		return data.mapIndexed { index, value ->
 			val x = when (index) {
-				firstIndex -> {
+				0 -> {
 					.0f
 				}
 				lastIndex -> {
 					canvasWidth.toFloat()
 				}
 				else -> {
-					(stepX * value.first) + prevX
+					(stepX * value.x) + prevX
 				}
 			}
 
 			prevX = x
 
-			val y = halfHeight + (value.second * halfHeight)
+			val y = canvasHalfHeight + (value.y * canvasHalfHeight)
 
-			x to y
+			PointF(x, y)
 		}
 	}
 
-	private fun drawProgressForeground(canvas: Canvas, paint: Paint, progress: Float = 1f) {
+	private fun drawPointer(canvas: Canvas) {
+		if (pointerPosition < 0f) return
+		if (isBuilderMode) return
+
+		canvas.save()
+		canvas.translate(0f, paddingTop.toFloat())
+
+		canvas.drawLine(pointerPosition, 0f, pointerPosition, canvasHeight.toFloat(), trackPaint)
+
+		canvas.restore()
+	}
+
+	private fun drawProgress(canvas: Canvas, paint: Paint, progress: Float = 1f) {
 		if (data.isEmpty() || progress == 0f) return
 
 		canvas.save()
@@ -360,8 +361,8 @@ class ToothyProgress : View {
 
 		val first = data.first()
 
-		var startX = first.first
-		var startY = first.second
+		var startX = first.x
+		var startY = first.y
 		val maxValue = progress * canvasWidth
 
 		val path = Path()
@@ -370,28 +371,124 @@ class ToothyProgress : View {
 		for (nextIndex in 1 until data.size) {
 			val point = data[nextIndex]
 
-			val nextX = point.first.coerceAtMost(maxValue)
-			val nextY = getCoordinateY(startX to startY, point, maxValue)
+			val nextX = point.x.coerceAtMost(maxValue)
+			val nextY = getCoordinateY(PointF(startX, startY), point, maxValue)
 
 			path.lineTo(nextX, nextY)
 
 			startX = nextX
 			startY = nextY
 
-			if (point.first > maxValue) break
+			if (point.x > maxValue) break
 		}
 
 		canvas.drawPath(path, paint)
+
 		canvas.restore()
 	}
 
-	private fun getCoordinateY(start: Pair<Float, Float>, end: Pair<Float, Float>, maxX: Float): Float {
-		if (maxX >= end.first) return end.second
+	private fun getCoordinateY(start: PointF, end: PointF, maxX: Float): Float {
+		if (maxX >= end.x) return end.y
 
-		val lambda = abs((start.first - maxX) / (maxX - end.first))
+		val lambda = abs((start.x - maxX) / (maxX - end.x))
 
-		return (start.second + end.second * lambda) / (1 + lambda)
+		return (start.y + end.y * lambda) / (1 + lambda)
 	}
+
+	//region Builder
+	private fun builderMoveApex(event: MotionEvent) {
+		val apex = nearestApex ?: return
+		val fracture = fractureData.getOrNull(nearestApexIndex) ?: return
+
+		val prevApex = data.getOrNull(nearestApexIndex - 1)
+		val nextApex = data.getOrNull(nearestApexIndex + 1)
+
+		apex.apply {
+			this.x = event.x.coerceIn(prevApex?.x ?: paddingStart.toFloat(),
+					nextApex?.x ?: canvasWidth.toFloat())
+			this.y = event.y.coerceIn(0f, canvasHeight.toFloat())
+		}
+
+		var stepX: Float
+		val prevX: Float
+
+		when {
+			prevApex != null -> {
+				stepX = apex.x - prevApex.x
+				prevX = prevApex.x
+			}
+			nextApex != null -> {
+				stepX = nextApex.x - apex.x
+				prevX = 1f
+			}
+			else -> {
+				stepX = 1f
+				prevX = 0f
+			}
+		}
+
+		if (stepX == 0f) stepX = 1f
+
+		fracture.apply {
+			this.y = (apex.y - canvasHalfHeight) / canvasHalfHeight
+			this.x = if (stepX != 0f) {
+				(apex.x - prevX) / stepX
+			} else {
+				0f
+			}
+		}
+
+		data[nearestApexIndex] = apex
+		fractureData[nearestApexIndex] = fracture
+
+		postInvalidate()
+	}
+
+	private fun builderDrawDebug(canvas: Canvas) {
+		if (isBuilderMode.not()) return
+
+		canvas.save()
+
+		canvas.translate(paddingStart.toFloat(), paddingTop.toFloat())
+
+		debugPaint.style = Paint.Style.STROKE
+		canvas.drawRect(Rect(0, 0, canvasWidth, canvasHeight), debugPaint)
+
+		val apex = nearestApex
+		if (apex != null) {
+			debugPaint.style = Paint.Style.FILL
+			canvas.drawCircle(apex.x, apex.y, context.convertDpToPixel(6).toFloat(), debugPaint)
+			canvas.drawLine(0f, apex.y, canvasWidth.toFloat(), apex.y, debugPaint)
+			canvas.drawLine(apex.x, 0f, apex.x, canvasHeight.toFloat(), debugPaint)
+		} else {
+			debugPaint.style = Paint.Style.FILL
+			canvas.drawLine(0f, canvasHalfHeight, canvasWidth.toFloat(), canvasHalfHeight, debugPaint)
+
+			for (nextIndex in 1 until data.size) {
+				val point = data[nextIndex]
+				canvas.drawLine(point.x, 0f, point.x, canvasHeight.toFloat(), debugPaint)
+			}
+		}
+
+		canvas.restore()
+	}
+
+	private fun builderFindNearestApexForPointer() {
+		var diffX: Float = Float.MAX_VALUE
+
+		for (i in 0 until data.size) {
+			val diffXNew = abs(pointerPosition - data[i].x)
+
+			if (diffXNew < diffX) {
+				nearestApexIndex = i
+				diffX = diffXNew
+			} else if (diffXNew > diffX) {
+				break
+			}
+		}
+	}
+
+	//endregion
 
 	//region Attributes
 	private fun inflateAttrs(attrs: AttributeSet?) {
@@ -400,7 +497,7 @@ class ToothyProgress : View {
 				R.styleable.ToothyProgress,
 				0,
 				0
-		) ?: return
+		)
 
 		with(resAttrs) {
 			progressStrokeCap = getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapProgress, 1))
@@ -417,6 +514,8 @@ class ToothyProgress : View {
 
 			progress = getFloat(R.styleable.ToothyProgress_progress, progress).coerceIn(0f, 1f)
 
+			isBuilderMode = getBoolean(R.styleable.ToothyProgress_isBuilderMode, false)
+
 			recycle()
 		}
 	}
@@ -431,6 +530,16 @@ class ToothyProgress : View {
 	//endregion
 
 	//region Paint
+	private fun getDebugPaint(): Paint {
+		return Paint().apply {
+			strokeCap = Paint.Cap.ROUND
+			strokeWidth = context.convertDpToPixel(1).toFloat()
+			style = Paint.Style.FILL
+			color = Color.MAGENTA
+			isAntiAlias = true
+		}
+	}
+
 	private fun getMarkerPaint(): Paint {
 		return Paint().apply {
 			strokeCap = Paint.Cap.ROUND
@@ -459,6 +568,15 @@ class ToothyProgress : View {
 			color = progressBackgroundColor
 			isAntiAlias = true
 		}
+	}
+
+	fun newApex(position: Int = data.size) {
+		if ((position in 0..data.size).not()) return
+
+		val nextY = nextFloat() * 2f - 1f
+		this.fractureData.add(position, PointF(1 - nextY, nextY))
+
+		setFractureData(ArrayList(fractureData))
 	}
 	//endregion
 

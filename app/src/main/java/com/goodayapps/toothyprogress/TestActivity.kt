@@ -1,91 +1,88 @@
 package com.goodayapps.toothyprogress
 
-import android.graphics.Color
+import android.graphics.PointF
 import android.os.Bundle
-import android.view.Gravity
-import android.view.View
-import android.widget.LinearLayout
-import android.widget.SeekBar
+import android.util.Log
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatTextView
-import com.bosphere.verticalslider.VerticalSlider
 import kotlinx.android.synthetic.main.activity_test.*
 
-class TestActivity : AppCompatActivity(R.layout.activity_test) {
+
+class TestActivity : AppCompatActivity(R.layout.activity_test), DemoPlayer.Listener {
+	private val demoPlayer by lazy { DemoPlayer(this) }
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		supportActionBar?.setDisplayHomeAsUpEnabled(true);
+		supportActionBar?.setDisplayShowHomeEnabled(true);
 
-		again.setOnClickListener { initProgressViews() }
+		again.setOnClickListener {
+			toothyProgressBuilder.setFractureDataPairs(listOf(
+					.5f to .5f,
+					.5f to 0f,
+					.5f to .5f,
+					1f to -.5f,
+					1f to .5f,
+					.5f to .0f,
+					1f to 1f,
+					1f to .0f,
+					1f to .0f
+			))
+		}
 
-		testSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-			override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-			}
+		add.setOnClickListener {
+			toothyProgressBuilder.newApex()
+		}
 
-			override fun onStartTrackingTouch(seekBar: SeekBar) {
-			}
+		uploadToDemo.setOnClickListener {
+			val fractureData = toothyProgressBuilder.getFractureData()
+			printFractureData(fractureData)
+			toothyProgressDemo.setFractureData(fractureData)
+		}
 
-			override fun onStopTrackingTouch(seekBar: SeekBar) {
-				toothyProgress.setProgress(seekBar.progress / 100f)
-			}
-		})
+		toothyProgressDemo.setListener(demoPlayer.progressListener)
 
-		initProgressViews()
+		play.setOnClickListener { demoPlayer.playSomething() }
 
 	}
 
+	private fun printFractureData(fractureData: MutableList<PointF>) {
+		val data = StringBuilder("\n")
+		data.append(".setFractureDataPairs(listOf(\n")
+		fractureData.forEach {
+			data.append("${it.x}f to ${it.y}f,")
+			data.append("\n")
+		}
+		data.append("))\n")
 
-	private fun initProgressViews() {
-		fractureSeekBars.removeAllViews()
-
-//		for (i: Int in 0..toothyProgress.fracturesCount) {
-//			fractureSeekBars.addView(getProgressView(toothyProgress.getFractureY(i)))
-//		}
+		Log.i("FractureData", data.toString())
 	}
 
-	private fun getProgressView(fractureY: Float): View? {
-		return LinearLayout(this).apply {
-			layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT).apply {
-				orientation = LinearLayout.VERTICAL
-				gravity = Gravity.CENTER
+	override fun onOptionsItemSelected(item: MenuItem): Boolean {
+		return when (item.itemId) {
+			android.R.id.home -> {
+				finish()
+				true
 			}
-			addView(VerticalSlider(this.context).apply {
-				layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT).apply {
-					val margin = convertDpToPixel(10)
-					setMargins(margin, 0, margin, 0)
-					weight = 1f
-				}
-
-				setThumbColor(Color.WHITE)
-				setTrackBgColor(Color.parseColor("#66FFFFFF"))
-				setTrackFgColor(Color.parseColor("#A2A4A8"))
-
-				setProgress(getProgressFromFracture(fractureY))
-
-				setOnSliderProgressChangeListener {
-					val index = fractureSeekBars.indexOfChild(this.parent as View)
-
-					val height = getHeightInRangeFromProgress(it)
-
-					toothyProgress.setFractureY(index, height)
-
-					(parent as LinearLayout).findViewWithTag<AppCompatTextView>("label")?.text = height.toString()
-				}
-			})
-
-			addView(AppCompatTextView(this.context).apply {
-				tag = "label"
-				setTextColor(Color.WHITE)
-				text = fractureY.toString()
-			})
+			else -> super.onOptionsItemSelected(item)
 		}
 	}
 
-	private fun getHeightInRangeFromProgress(progress: Float): Float {
-		return ((2f * progress) - 1f) * -1f
+	override fun updateTimerAndSeekbar(duration: Long, currentPosition: Long) {
+		// Updating progress bar
+		val progress = currentPosition / duration.toFloat()
+		toothyProgressDemo.setProgress(progress, false)
 	}
 
-	private fun getProgressFromFracture(fracture: Float): Float {
-		return (-fracture + 1f) / 2f
+	override fun onCompletion() {
+		play.setImageResource(R.drawable.ic_play_arrow)
 	}
 
+	override fun onPlayerPause() {
+		play.setImageResource(R.drawable.ic_play_arrow)
+	}
+
+	override fun onPlayerResume() {
+		play.setImageResource(R.drawable.ic_pause)
+	}
 }

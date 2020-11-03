@@ -18,7 +18,8 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name=".TestActivity"/>
+		<activity android:name=".TestActivity"
+			android:theme="@style/TestTheme"/>
 	</application>
 
 </manifest>

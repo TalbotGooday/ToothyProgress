@@ -44,7 +44,7 @@
 				app:progressWidth="3dp"
 				app:trackWidth="3dp"
 				app:trackColor="#959595"
-				app:strokeLineCapProgress="round"
+				app:strokeLineCapProgress="square"
 				app:strokeLineCapProgressBackground="square"
 				app:strokeLineCapTrack="square"
 				app:progressBackgroundWidth="3dp"

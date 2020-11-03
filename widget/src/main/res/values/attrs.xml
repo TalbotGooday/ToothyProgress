@@ -23,5 +23,6 @@
 		<attr name="progressWidth" format="dimension"/>
 		<attr name="trackWidth" format="dimension"/>
 		<attr name="progressBackgroundWidth" format="dimension"/>
+		<attr name="isBuilderMode" format="boolean"/>
 	</declare-styleable>
 </resources>
