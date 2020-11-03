@@ -15,6 +15,7 @@ import androidx.annotation.FloatRange
 import androidx.annotation.RequiresApi
 import com.goodayapps.widget.utils.convertDpToPixel
 import kotlin.math.abs
+import kotlin.math.sqrt
 import kotlin.random.Random.Default.nextFloat
 
 class ToothyProgress : View {
@@ -307,7 +308,7 @@ class ToothyProgress : View {
 		progress = ((pointerPosition - paddingStart) / canvasWidth.toFloat()).coerceAtMost(1f)
 
 		if (isBuilderMode) {
-			builderFindNearestApexForPointer()
+			builderFindNearestApexForPointer(pointerPosition, event.y)
 		}
 	}
 
@@ -473,17 +474,23 @@ class ToothyProgress : View {
 		canvas.restore()
 	}
 
-	private fun builderFindNearestApexForPointer() {
-		var diffX: Float = Float.MAX_VALUE
+	private fun builderFindNearestApexForPointer(pointerX: Float, pointerY: Float) {
+		var lastL: Float = Float.MAX_VALUE
+
+		val closestRange = canvasWidth / data.size.toFloat()
 
 		for (i in 0 until data.size) {
-			val diffXNew = abs(pointerPosition - data[i].x)
+			val apex = data[i]
 
-			if (diffXNew < diffX) {
+			if (apex.x !in pointerX - closestRange..pointerX + closestRange) continue
+
+			val coordV = PointF(pointerX - apex.x, pointerY - apex.y)
+
+			val l = abs(sqrt(coordV.x * coordV.x + coordV.y * coordV.y))
+
+			if (l < lastL) {
 				nearestApexIndex = i
-				diffX = diffXNew
-			} else if (diffXNew > diffX) {
-				break
+				lastL = l
 			}
 		}
 	}
