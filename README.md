@@ -1,11 +1,15 @@
-# ToothyProgress
+<a href="https://helpcrunch.com/"><p align="center"><img alt="flow" width="400" src="/screenshots/2.png"></p></a>
 
-[![](https://jitpack.io/v/TalbotGooday/ToothyProgress.svg)](https://jitpack.io/#TalbotGooday/ToothyProgress)
-[![License](http://img.shields.io/badge/license-MIT-green.svg?style=flat)]()
+<p align=center>
+<a href="https://jitpack.io/#TalbotGooday/ToothyProgress"><img src="https://jitpack.io/v/TalbotGooday/ToothyProgress.svg" /></a>
+<img alt="Platform" src="https://img.shields.io/badge/platforms-Android-green.svg" />
+<img alt="Languages" src="https://img.shields.io/badge/languages-Kotlin-F18E33.svg" />
+<a href="https://www.apache.org/licenses/LICENSE-2.0.html"><img src="http://img.shields.io/badge/license-MIT-green.svg?style=flat" /></a>
+</p>
 
 A polyline determinated ProgressBar written in Kotlin
 
-<img src="/screenshots/Screenshot_1599544460.png" width=32%/>
+<p><img src="/screenshots/Screenshot_1599544460.png" width=32%/></p>
 
 ## Getting started
 
@@ -61,6 +65,21 @@ toothyProgress.setListener(object : ToothyProgress.Listener {
 	}
 })
 ```
+## Visual Editor
+In recent versions, the ability to customize the type of progress using the Visual Editor has been added.
+<p><img src="/screenshots/3.png" width=32%/></p>
+
+### How to use Visual Editor
+1. Open editor
+2. Move the apexes as you like. Add new apexes
+3. Click **Load into demo player** to check the result
+4. Check the Logcat for the **FractureData** tag and copy the initialization code from the logs
+
+## TODO
+- [ ] Indeterminate Progress
+- [ ] Style initialization from a `.json` file
+- [ ] Visual Editor improvements
+
 
 ## License
 
