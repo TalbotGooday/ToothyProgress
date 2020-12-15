@@ -24,5 +24,10 @@
 		<attr name="trackWidth" format="dimension"/>
 		<attr name="progressBackgroundWidth" format="dimension"/>
 		<attr name="isBuilderMode" format="boolean"/>
+		<attr name="progressType" format="enum">
+			<enum name="determinate" value="0"/>
+			<enum name="indeterminate" value="1"/>
+		</attr>
+		<attr name="indeterminateTrackSize" format="float"/>
 	</declare-styleable>
 </resources>
