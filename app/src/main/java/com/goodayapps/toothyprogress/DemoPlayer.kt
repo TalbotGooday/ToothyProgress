@@ -59,7 +59,7 @@ class DemoPlayer(private val context: Context) {
 
 		try {
 			mp.setAudioStreamType(AudioManager.STREAM_MUSIC)
-			val afd = context.assets.openFd("short_music.mp3")
+			val afd = context.assets.openFd("sample.mp3")
 			mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
 			afd.close()
 			mp.prepare()

@@ -9,7 +9,7 @@
 
 A polyline determinated ProgressBar written in Kotlin
 
-<p><img src="/screenshots/Screenshot_1599544460.png" width=32%/></p>
+<img src="/screenshots/demo.gif" width=32%/>
 
 ## Getting started
 
@@ -76,7 +76,7 @@ In recent versions, the ability to customize the type of progress using the Visu
 4. Check the Logcat for the **FractureData** tag and copy the initialization code from the logs
 
 ## TODO
-- [ ] Indeterminate Progress
+- [x] Indeterminate Progress
 - [ ] Style initialization from a `.json` file
 - [ ] Visual Editor improvements
 
