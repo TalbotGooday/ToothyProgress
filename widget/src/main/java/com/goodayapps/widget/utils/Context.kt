@@ -8,7 +8,7 @@ import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 
-internal fun Context.convertDpToPixel(dp: Int): Int {
+internal fun Context.dp(dp: Int): Int {
 	val metrics = resources.displayMetrics
 	return dp * (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT)
 }

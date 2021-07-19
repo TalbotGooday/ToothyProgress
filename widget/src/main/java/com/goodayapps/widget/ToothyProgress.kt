@@ -4,6 +4,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.os.Build
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -13,7 +15,8 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Dimension
 import androidx.annotation.FloatRange
 import androidx.annotation.RequiresApi
-import com.goodayapps.widget.utils.convertDpToPixel
+import com.goodayapps.widget.utils.dp
+import org.jetbrains.annotations.NotNull
 import kotlin.math.abs
 import kotlin.math.sqrt
 import kotlin.random.Random.Default.nextFloat
@@ -45,13 +48,15 @@ class ToothyProgress : View {
 
     var type = Type.DETERMINATE
         set(value) {
-            field = value
+            changeType(value)
 
-            changeType()
+            field = value
         }
 
-    private fun changeType() {
-        if (type == Type.DETERMINATE) {
+    private fun changeType(value: Type) {
+        if (value == type) return
+
+        if (value == Type.DETERMINATE) {
             invalidate()
         } else {
             indeterminateAnimator.start()
@@ -110,7 +115,7 @@ class ToothyProgress : View {
         }
 
     @Dimension(unit = Dimension.PX)
-    var progressWidth = context.convertDpToPixel(3).toFloat()
+    var progressWidth = context.dp(3).toFloat()
         set(value) {
             field = value
             progressPaint.strokeWidth = value
@@ -119,7 +124,7 @@ class ToothyProgress : View {
         }
 
     @Dimension(unit = Dimension.PX)
-    var trackWidth = context.convertDpToPixel(3).toFloat()
+    var trackWidth = context.dp(3).toFloat()
         set(value) {
             field = value
             trackPaint.strokeWidth = value
@@ -128,7 +133,7 @@ class ToothyProgress : View {
         }
 
     @Dimension(unit = Dimension.PX)
-    var progressBackgroundWidth = context.convertDpToPixel(3).toFloat()
+    var progressBackgroundWidth = context.dp(3).toFloat()
         set(value) {
             field = value
             progressBackgroundPaint.strokeWidth = value
@@ -165,20 +170,28 @@ class ToothyProgress : View {
         inflateAttrs(attrs)
     }
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
         inflateAttrs(attrs)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
+    constructor(
+        context: Context?,
+        attrs: AttributeSet?,
+        defStyleAttr: Int,
+        defStyleRes: Int
+    ) : super(context, attrs, defStyleAttr, defStyleRes) {
         inflateAttrs(attrs)
     }
 
     init {
-        val padding = context.convertDpToPixel(12)
+        val padding = context.dp(12)
         setPadding(padding, padding, padding, padding)
     }
-
 
     override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo) {
         super.onInitializeAccessibilityNodeInfo(info)
@@ -186,10 +199,10 @@ class ToothyProgress : View {
         info.contentDescription = "ProgressBar"
 
         val rangeInfo = RangeInfo.obtain(
-                RangeInfo.RANGE_TYPE_INT,
-                0.0f,
-                1f,
-                progress
+            RangeInfo.RANGE_TYPE_INT,
+            0.0f,
+            1f,
+            progress
         )
 
         info.rangeInfo = rangeInfo
@@ -197,7 +210,8 @@ class ToothyProgress : View {
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        setFractureDataPairs(listOf(
+        setFractureDataPairs(
+            listOf(
                 .5f to .5f,
                 .5f to 0f,
                 .5f to .5f,
@@ -207,7 +221,8 @@ class ToothyProgress : View {
                 1f to 1f,
                 1f to .0f,
                 1f to .0f
-        ))
+            )
+        )
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -240,29 +255,59 @@ class ToothyProgress : View {
             MotionEvent.ACTION_DOWN,
             MotionEvent.ACTION_MOVE,
             -> {
-                if (nearestApex == null) {
-                    trackTouch(event)
-                } else {
-                    builderMoveApex(event)
+                if (type == Type.DETERMINATE) {
+                    if (nearestApex == null) {
+                        trackTouch(event)
+                    } else {
+                        builderMoveApex(event)
+                    }
                 }
-
-                return true
             }
-            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_UP -> {
+                if (type == Type.DETERMINATE) {
+                    stopTrackingTouch()
+                }
+            }
+
             MotionEvent.ACTION_CANCEL,
             -> {
-                stopTrackingTouch()
-                return true
+                if (type == Type.DETERMINATE) {
+                    stopTrackingTouch()
+                }
             }
         }
 
-        return super.onTouchEvent(event)
+        return type == Type.DETERMINATE
+    }
+
+    override fun onSaveInstanceState(): Parcelable? {
+        val superState = super.onSaveInstanceState()
+        return superState?.let {
+            val savedState = SavedState(it)
+            savedState.progress = progress
+            savedState.type = type.value
+            savedState
+        } ?: superState
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if (state !is SavedState) {
+            super.onRestoreInstanceState(state)
+            return
+        }
+
+        super.onRestoreInstanceState(state.superState)
+
+        this.progress = state.progress
+        this.type = Type.from(state.type)
     }
 
     fun setProgress(@FloatRange(from = 0.0, to = 1.0) progress: Float, animated: Boolean = true) {
         if (isTouching) return
 
-        type = Type.DETERMINATE
+        if (type != Type.DETERMINATE) {
+            type = Type.DETERMINATE
+        }
 
         if (animated) {
             progressAnimator?.cancel()
@@ -295,23 +340,6 @@ class ToothyProgress : View {
     }
 
     fun getFractureData() = fractureData
-
-    fun setFractureY(index: Int, @FloatRange(from = -1.0, to = 1.0) scale: Float) {
-        var dataItem = data.getOrNull(index) ?: return
-        var fractureItem = fractureData.getOrNull(index) ?: return
-
-        dataItem = PointF(dataItem.x, (canvasHalfHeight + (scale * canvasHalfHeight)))
-        fractureItem = PointF(fractureItem.x, scale)
-
-        data[index] = dataItem
-        fractureData[index] = fractureItem
-
-        invalidate()
-    }
-
-    fun getFractureY(index: Int): Float {
-        return fractureData.getOrNull(index)?.y ?: 0f
-    }
 
     private fun stopTrackingTouch() {
         isTouching = false
@@ -418,7 +446,12 @@ class ToothyProgress : View {
         canvas.restore()
     }
 
-    private fun drawIndeterminateProgress(canvas: Canvas, paint: Paint, lower: Float, upper: Float) {
+    private fun drawIndeterminateProgress(
+        canvas: Canvas,
+        paint: Paint,
+        lower: Float,
+        upper: Float
+    ) {
         canvas.save()
 
         canvas.translate(paddingStart.toFloat(), paddingTop.toFloat())
@@ -479,8 +512,10 @@ class ToothyProgress : View {
         val nextApex = data.getOrNull(nearestApexIndex + 1)
 
         apex.apply {
-            this.x = event.x.coerceIn(prevApex?.x ?: paddingStart.toFloat(),
-                    nextApex?.x ?: canvasWidth.toFloat())
+            this.x = event.x.coerceIn(
+                prevApex?.x ?: paddingStart.toFloat(),
+                nextApex?.x ?: canvasWidth.toFloat()
+            )
             this.y = event.y.coerceIn(0f, canvasHeight.toFloat())
         }
 
@@ -532,12 +567,18 @@ class ToothyProgress : View {
         val apex = nearestApex
         if (apex != null) {
             debugPaint.style = Paint.Style.FILL
-            canvas.drawCircle(apex.x, apex.y, context.convertDpToPixel(6).toFloat(), debugPaint)
+            canvas.drawCircle(apex.x, apex.y, context.dp(6).toFloat(), debugPaint)
             canvas.drawLine(0f, apex.y, canvasWidth.toFloat(), apex.y, debugPaint)
             canvas.drawLine(apex.x, 0f, apex.x, canvasHeight.toFloat(), debugPaint)
         } else {
             debugPaint.style = Paint.Style.FILL
-            canvas.drawLine(0f, canvasHalfHeight, canvasWidth.toFloat(), canvasHalfHeight, debugPaint)
+            canvas.drawLine(
+                0f,
+                canvasHalfHeight,
+                canvasWidth.toFloat(),
+                canvasHalfHeight,
+                debugPaint
+            )
 
             for (nextIndex in 1 until data.size) {
                 val point = data[nextIndex]
@@ -574,28 +615,38 @@ class ToothyProgress : View {
     //region Attributes
     private fun inflateAttrs(attrs: AttributeSet?) {
         val resAttrs = context.theme.obtainStyledAttributes(
-                attrs,
-                R.styleable.ToothyProgress,
-                0,
-                0
+            attrs,
+            R.styleable.ToothyProgress,
+            0,
+            0
         )
 
         with(resAttrs) {
-            progressStrokeCap = getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapProgress, 1))
-            progressBackgroundStrokeCap = getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapProgressBackground, 1))
-            strokeLineCapTrack = getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapTrack, 1))
+            progressStrokeCap =
+                getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapProgress, 1))
+            progressBackgroundStrokeCap =
+                getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapProgressBackground, 1))
+            strokeLineCapTrack =
+                getCapType(getInt(R.styleable.ToothyProgress_strokeLineCapTrack, 1))
 
             progressColor = getColor(R.styleable.ToothyProgress_progressColor, progressColor)
-            progressBackgroundColor = getColor(R.styleable.ToothyProgress_progressBackgroundColor, progressBackgroundColor)
+            progressBackgroundColor = getColor(
+                R.styleable.ToothyProgress_progressBackgroundColor,
+                progressBackgroundColor
+            )
             trackColor = getColor(R.styleable.ToothyProgress_trackColor, trackColor)
 
             progressWidth = getDimension(R.styleable.ToothyProgress_progressWidth, progressWidth)
             trackWidth = getDimension(R.styleable.ToothyProgress_progressWidth, trackWidth)
-            progressBackgroundWidth = getDimension(R.styleable.ToothyProgress_progressBackgroundWidth, progressBackgroundWidth)
+            progressBackgroundWidth = getDimension(
+                R.styleable.ToothyProgress_progressBackgroundWidth,
+                progressBackgroundWidth
+            )
             type = Type.from(getInt(R.styleable.ToothyProgress_progressType, type.value))
 
             progress = getFloat(R.styleable.ToothyProgress_progress, progress).coerceIn(0f, 1f)
-            indeterminateTrackSize = getFloat(R.styleable.ToothyProgress_indeterminateTrackSize, indeterminateTrackSize)
+            indeterminateTrackSize =
+                getFloat(R.styleable.ToothyProgress_indeterminateTrackSize, indeterminateTrackSize)
             isBuilderMode = getBoolean(R.styleable.ToothyProgress_isBuilderMode, false)
 
             recycle()
@@ -615,7 +666,7 @@ class ToothyProgress : View {
     private fun getDebugPaint(): Paint {
         return Paint().apply {
             strokeCap = Paint.Cap.ROUND
-            strokeWidth = context.convertDpToPixel(1).toFloat()
+            strokeWidth = context.dp(1).toFloat()
             style = Paint.Style.FILL
             color = Color.MAGENTA
             isAntiAlias = true
@@ -625,7 +676,7 @@ class ToothyProgress : View {
     private fun getMarkerPaint(): Paint {
         return Paint().apply {
             strokeCap = Paint.Cap.ROUND
-            strokeWidth = context.convertDpToPixel(3).toFloat()
+            strokeWidth = context.dp(3).toFloat()
             style = Paint.Style.FILL
             color = trackColor
             isAntiAlias = true
@@ -635,7 +686,7 @@ class ToothyProgress : View {
     private fun getProgressPaint(): Paint {
         return Paint().apply {
             strokeCap = Paint.Cap.ROUND
-            strokeWidth = context.convertDpToPixel(3).toFloat()
+            strokeWidth = context.dp(3).toFloat()
             style = Paint.Style.STROKE
             color = progressColor
             isAntiAlias = true
@@ -645,7 +696,7 @@ class ToothyProgress : View {
     private fun getProgressBackgroundPaint(): Paint {
         return Paint().apply {
             strokeCap = Paint.Cap.ROUND
-            strokeWidth = context.convertDpToPixel(3).toFloat()
+            strokeWidth = context.dp(3).toFloat()
             style = Paint.Style.STROKE
             color = progressBackgroundColor
             isAntiAlias = true
@@ -687,6 +738,38 @@ class ToothyProgress : View {
 
         companion object {
             fun from(value: Int) = values().firstOrNull { it.value == value } ?: DETERMINATE
+        }
+    }
+
+    class SavedState : BaseSavedState {
+        var progress: Float = 0f
+        var type: Int = Type.DETERMINATE.value
+
+        constructor(superState: Parcelable) : super(superState)
+
+        private constructor(`in`: Parcel) : super(`in`) {
+            this.progress = `in`.readFloat()
+            this.type = `in`.readInt()
+        }
+
+        override fun writeToParcel(out: Parcel, flags: Int) {
+            super.writeToParcel(out, flags)
+            out.writeFloat(this.progress)
+            out.writeInt(this.type)
+        }
+
+        companion object {
+            @JvmField
+            @NotNull
+            val CREATOR: Parcelable.Creator<SavedState> = object : Parcelable.Creator<SavedState> {
+                override fun createFromParcel(`in`: Parcel): SavedState {
+                    return SavedState(`in`)
+                }
+
+                override fun newArray(size: Int): Array<SavedState?> {
+                    return arrayOfNulls(size)
+                }
+            }
         }
     }
 
