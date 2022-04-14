@@ -7,7 +7,7 @@
 <a href="https://www.apache.org/licenses/LICENSE-2.0.html"><img src="http://img.shields.io/badge/license-MIT-green.svg?style=flat" /></a>
 </p>
 
-A polyline determinated ProgressBar written in Kotlin
+A polyline determinated ProgressBar written in Kotlin. Inspired by this [Reddit post](https://www.reddit.com/r/androidthemes/comments/dymczf/theme_blurred_forest/)
 
 <img src="/screenshots/demo.gif" width=32%/>
 
